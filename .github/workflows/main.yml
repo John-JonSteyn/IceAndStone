@@ -45,7 +45,7 @@ jobs:
       - name: Bump Version
         id: bump_version
         run: |
-          file="CurlItApp/app-version.json"
+          file="IceAndStoneApp/app-version.json"
           current_version=$(jq -r '.version' "$file")
           echo "Current version: $current_version"
           IFS='.' read -r major minor patch <<< "$current_version"
@@ -69,7 +69,7 @@ jobs:
         run: |
           git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git config --local user.name "$GITHUB_ACTOR"
-          git add "CurlItApp/app-version.json"
+          git add "IceAndStoneApp/app-version.json"
           git commit -m "Auto version bump to ${{ steps.bump_version.outputs.new_version }}" || echo "No changes to commit"
 
       - name: Push Changes

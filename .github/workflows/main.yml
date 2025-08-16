@@ -1,0 +1,79 @@
+name: Auto Versioning
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  versioning_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Determine Bump Type
+        id: determine_bump
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            merged=$(jq -r '.pull_request.merged' "$GITHUB_EVENT_PATH")
+            if [ "$merged" != "true" ]; then
+              echo "PR not merged, skipping version bump."
+              echo "bump_type=none" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            if jq -e '.pull_request.labels[] | select(.name | ascii_downcase == "bug")' "$GITHUB_EVENT_PATH" > /dev/null; then
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+            elif jq -e '.pull_request.labels[] | select(.name | ascii_downcase == "feature")' "$GITHUB_EVENT_PATH" > /dev/null; then
+              echo "bump_type=minor" >> $GITHUB_OUTPUT
+            else
+              echo "bump_type=minor" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
+          fi
+          echo "Determined bump type: ${{ steps.determine_bump.outputs.bump_type }}"
+
+      - name: Bump Version
+        id: bump_version
+        run: |
+          file="CurlItApp/app-version.json"
+          current_version=$(jq -r '.version' "$file")
+          echo "Current version: $current_version"
+          IFS='.' read -r major minor patch <<< "$current_version"
+          bump_type="${{ steps.determine_bump.outputs.bump_type }}"
+          echo "Bump type: $bump_type"
+          if [ "$bump_type" = "patch" ]; then
+            new_patch=$((patch + 1))
+            new_version="${major}.${minor}.${new_patch}"
+          elif [ "$bump_type" = "minor" ]; then
+            new_minor=$((minor + 1))
+            new_version="${major}.${new_minor}.0"
+          else
+            echo "No bump type specified, exiting."
+            exit 0
+          fi
+          echo "New version: $new_version"
+          echo "{\"version\": \"$new_version\"}" > "$file"
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Commit Version Bump
+        run: |
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --local user.name "$GITHUB_ACTOR"
+          git add "CurlItApp/app-version.json"
+          git commit -m "Auto version bump to ${{ steps.bump_version.outputs.new_version }}" || echo "No changes to commit"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main

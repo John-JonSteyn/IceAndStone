@@ -92,6 +92,42 @@ API endpoints will be available at: `http://localhost:5000/swagger`
 
 ---
 
+## Database Schema
+
+The Ice And Stone project uses a relational MySQL schema to manage venues, sessions, games, teams, rounds, team scores, and achievements.
+
+### Visual ERD
+![Ice and Stone ERD](Docs/ERD.png)
+
+### Schema Definition
+The schema is also defined using [dbdiagram.io](https://dbdiagram.io/) format in [`Docs/ERD.sql`](Docs/ERD.sql).
+
+Here’s an excerpt showing how games, rounds, and team scores are represented. These tables form the backbone of scorekeeping:
+```sql
+Table Game {
+  id           long [pk]
+  SessionId    long [ref: > Session.id]
+  StartTime    datetime [not null]
+  EndTime      datetime
+}
+
+Table Round {
+  id                 long [pk]
+  GameId             long [ref: > Game.id]
+  Number             int  [not null, note: "1-based per game"]
+  StartsFirstTeamId  long [ref: > Team.id]
+}
+
+Table TeamScore {
+  id        long [pk]
+  RoundId   long [ref: > Round.id]
+  TeamId    long [ref: > Team.id]
+  Value     int  [not null, note: "Points earned this round"]
+}
+```
+
+---
+
 ## License
 
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0)** License.

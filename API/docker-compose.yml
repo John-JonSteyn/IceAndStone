@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8
+    container_name: iceandstone-db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: iceandstone
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iceandstone-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__Default: "Server=db;Port=3306;Database=iceandstone;User=root;Password=secret;TreatTinyAsBoolean=true"
+      Swagger__Enabled: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:

@@ -1,18 +1,34 @@
+using IceAndStone.API.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+                     ?? builder.Configuration.GetConnectionString("Default")
+                     ?? throw new InvalidOperationException("Missing connection string 'Default'.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+var application = builder.Build();
 
-if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Swagger:Enabled"))
+using (var scope = application.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
 }
 
-app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+if (application.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Swagger:Enabled"))
+{
+    application.UseSwagger();
+    application.UseSwaggerUI();
+}
 
-app.Run();
+application.MapControllers();
+application.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+application.Run();

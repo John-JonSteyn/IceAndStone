@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
+<PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b551e3b3-ff10-42a6-a621-62fe89a68009</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <RootNamespace>IceAndStone.API</RootNamespace>
+    <AssemblyName>IceAndStone.API</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

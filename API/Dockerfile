@@ -27,4 +27,4 @@ RUN dotnet publish "./IceAndStone.Api.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "IceAndStone.Api.dll"]
+ENTRYPOINT ["dotnet", "IceAndStone.API.dll"]

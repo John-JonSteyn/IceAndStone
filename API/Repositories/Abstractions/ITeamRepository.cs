@@ -1,6 +1,8 @@
-﻿namespace IceAndStone.API.Repositories.Abstractions
+﻿using IceAndStone.API.Entities;
+
+namespace IceAndStone.API.Repositories.Abstractions
 {
-    public interface ITeamRepository
+    public interface ITeamRepository : IBaseRepository<Team>
     {
     }
 }

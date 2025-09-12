@@ -1,6 +1,6 @@
-﻿namespace IceAndStone.API.Repositories.Abstractions
+﻿using IceAndStone.API.Entities;
+
+namespace IceAndStone.API.Repositories.Abstractions
 {
-    public interface IGameRepository
-    {
-    }
+    public interface IGameRepository : IBaseRepository<Game> { }
 }

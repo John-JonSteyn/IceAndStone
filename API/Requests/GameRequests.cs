@@ -1,6 +1,5 @@
 ﻿namespace IceAndStone.API.Requests
 {
-    public class GameRequests
-    {
-    }
+    public record StartGameRequest(long SessionId, int? TargetRounds);
+    public record EndGameRequest(long GameId);
 }

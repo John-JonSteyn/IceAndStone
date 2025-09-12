@@ -1,6 +1,4 @@
 ﻿namespace IceAndStone.API.Requests
 {
-    public class ScoreRequests
-    {
-    }
+    public record PostTeamScoreRequest(long RoundId, long TeamId, int Value);
 }

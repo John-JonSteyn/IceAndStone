@@ -1,4 +1,8 @@
 using IceAndStone.API.Data;
+using IceAndStone.API.Repositories;
+using IceAndStone.API.Repositories.Abstractions;
+using IceAndStone.API.Services;
+using IceAndStone.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +31,20 @@ if (application.Environment.IsDevelopment() || builder.Configuration.GetValue<bo
     application.UseSwagger();
     application.UseSwaggerUI();
 }
+
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IRoundRepository, RoundRepository>();
+builder.Services.AddScoped<IScoreRepository, ScoreRepository>();
+
+builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IRoundService, RoundService>();
+builder.Services.AddScoped<IScoreService, ScoreService>();
 
 application.MapControllers();
 application.MapGet("/health", () => Results.Ok(new { status = "ok" }));

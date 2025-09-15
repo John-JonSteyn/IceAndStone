@@ -15,7 +15,7 @@ namespace IceAndStone.API.Data
 		public DbSet<Team> Teams => Set<Team>();
 		public DbSet<Player> Players => Set<Player>();
 		public DbSet<TeamScore> TeamScores => Set<TeamScore>();
-		public DbSet<AchievementRepo> Achievements => Set<AchievementRepo>();
+		public DbSet<Achievement> Achievements => Set<Achievement>();
 		public DbSet<TeamAchievement> TeamAchievements => Set<TeamAchievement>();
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -108,7 +108,7 @@ namespace IceAndStone.API.Data
 				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<TeamAchievement>()
-				.HasOne<AchievementRepo>()
+				.HasOne<Achievement>()
 				.WithMany()
 				.HasForeignKey(teamAchievement => teamAchievement.AchievementId)
 				.OnDelete(DeleteBehavior.Cascade);
@@ -125,70 +125,70 @@ namespace IceAndStone.API.Data
 				.HasForeignKey(teamAchievement => teamAchievement.GameId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<AchievementRepo>().HasData(
-				new AchievementRepo
+			modelBuilder.Entity<Achievement>().HasData(
+				new Achievement
 				{
 					Id = 1,
 					Name = "Icebreaker",
 					TriggerType = "round",
 					Description = "Team scores first points in a game"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 2,
 					Name = "Mighty Mjolnir",
 					TriggerType = "round",
 					Description = "Team scores maximum points in a round"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 3,
 					Name = "Lucky Loki",
 					TriggerType = "round",
 					Description = "Team scores max points in 3 consecutive rounds"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 4,
 					Name = "Looking for Leif",
 					TriggerType = "session",
 					Description = "Team completes 5+ games in a session"
 				},
-				new AchievementRepo {
+				new Achievement {
 					Id = 5,
 					Name = "Niflheim’s Touch",
 					TriggerType = "session",
 					Description = "Team scores zero in a game"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 6,
 					Name = "Odin’s Offspring",
 					TriggerType = "session",
 					Description = "Win all games in a session with at least 5 games"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 7,
 					Name = "Appointed Housecarl",
 					TriggerType = "session",
 					Description = "Win 1 game"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 8,
 					Name = "Dubbed Thane",
 					TriggerType = "session",
 					Description = "Win 2 consecutive games"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 9,
 					Name = "Promoted to Jarl",
 					TriggerType = "session",
 					Description = "Win 3 consecutive games"
 				},
-				new AchievementRepo
+				new Achievement
 				{
 					Id = 10,
 					Name = "Coronated King",

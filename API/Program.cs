@@ -18,20 +18,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var application = builder.Build();
-
-using (var scope = application.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
-}
-
-if (application.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Swagger:Enabled"))
-{
-    application.UseSwagger();
-    application.UseSwaggerUI();
-}
-
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
@@ -46,7 +32,22 @@ builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddScoped<IScoreService, ScoreService>();
 
-application.MapControllers();
-application.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+var application = builder.Build();
 
-application.Run();
+using (var scope = application.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
+if (application.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Swagger:Enabled"))
+{
+    application.UseSwagger();
+    application.UseSwaggerUI();
+
+
+    application.MapControllers();
+    application.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+    application.Run();
+}

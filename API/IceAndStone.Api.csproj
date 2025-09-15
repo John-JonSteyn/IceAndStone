@@ -9,6 +9,7 @@
     <DockerfileContext>.</DockerfileContext>
     <RootNamespace>IceAndStone.API</RootNamespace>
     <AssemblyName>IceAndStone.API</AssemblyName>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>

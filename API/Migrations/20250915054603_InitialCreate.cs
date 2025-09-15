@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IceAndStone.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateWithSeeds : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

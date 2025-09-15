@@ -6,7 +6,7 @@ services:
       MYSQL_DATABASE: iceandstone
       MYSQL_ROOT_HOST: "%"
     ports:
-      - "3307:3307"
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -15,7 +15,7 @@ services:
       timeout: 3s
       retries: 20
 
-  iceandstone.api:
+  api:
     build:
       context: ./API
       dockerfile: Dockerfile
@@ -29,7 +29,7 @@ services:
         Server=db;Port=3306;Database=iceandstone;User=root;Password=secret;
         TreatTinyAsBoolean=true;AllowPublicKeyRetrieval=True;SslMode=None
     ports:
-      - "8080:8080"
+      - "8080:8080" # http://localhost:8080/swagger
 
 volumes:
   db_data:

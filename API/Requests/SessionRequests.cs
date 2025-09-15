@@ -1,6 +1,5 @@
 ﻿namespace IceAndStone.API.Requests
 {
-    public class SessionRequests
-    {
-    }
+    public record StartSessionRequest(long LaneId);
+    public record EndSessionRequest(long SessionId);
 }

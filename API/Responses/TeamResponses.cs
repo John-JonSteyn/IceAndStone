@@ -1,6 +1,4 @@
 ﻿namespace IceAndStone.API.Responses
 {
-    public class TeamResponses
-    {
-    }
+    public record TeamResponse(long Id, long GameId, string Name, string Colour, bool HasFirstRound);
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IceAndStone.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250909044827_InitialCreateWithSeeds")]
-    partial class InitialCreateWithSeeds
+    [Migration("20250915054603_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

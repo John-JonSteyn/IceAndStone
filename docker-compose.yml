@@ -5,8 +5,8 @@ services:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: iceandstone
       MYSQL_ROOT_HOST: "%"
-    ports:
-      - "3306:3306"
+    #ports:
+     # - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -29,7 +29,6 @@ services:
         Server=db;Port=3306;Database=iceandstone;User=root;Password=secret;
         TreatTinyAsBoolean=true;AllowPublicKeyRetrieval=True;SslMode=None
     ports:
-      - "8080:8080" # http://localhost:8080/swagger
-
+      - "8080:8080"
 volumes:
   db_data:

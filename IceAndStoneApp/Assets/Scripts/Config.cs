@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace IceAndStone.App.Config
 {
-    public sealed class AppConfig
+    public sealed class Config
     {
         [JsonProperty("apiBaseUrl")]
         public string ApiBaseUrl { get; set; } = "http://localhost:8080";

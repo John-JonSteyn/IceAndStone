@@ -45,7 +45,7 @@ jobs:
       - name: Bump Version
         id: bump_version
         run: |
-          file="IceAndStoneApp/app-version.json"
+          file="IceAndStoneApp/Assets/app-version.json"
           current_version=$(jq -r '.version' "$file")
           echo "Current version: $current_version"
           IFS='.' read -r major minor patch <<< "$current_version"

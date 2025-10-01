@@ -1,4 +1,0 @@
-repository "IceAndStoneApp/IceAndStoneApp@1375055004135@cloud"
-  path "/"
-    br "/main"
-    co "/main"

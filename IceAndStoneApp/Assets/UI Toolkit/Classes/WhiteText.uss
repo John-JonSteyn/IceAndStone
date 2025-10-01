@@ -1,0 +1,10 @@
+.WhiteText {
+    color: rgb(255, 255, 255);
+    -unity-text-align: upper-center;
+    font-size: 70px;
+    -unity-font-definition: url("project://database/Assets/Fonts/Metamorphous-Regular.ttf?fileID=12800000&guid=116fd0d23262b3a4b94ec0689ae9e2ae&type=3#Metamorphous-Regular");
+}
+
+.ArrowButton {
+    width: 150px;
+}

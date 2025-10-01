@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Classes/WhiteText.uss?fileID=7433441132597879392&amp;guid=e0639b712578b3347a2e9374d27e2ce9&amp;type=3#WhiteText" />
+    <ui:Label text="Session Number Game Number" name="Header" class="WhiteText" style="margin-top: 37px; margin-right: 37px; margin-bottom: 37px; margin-left: 37px;" />
+    <ui:VisualElement name="TeamPanelContainer" style="flex-grow: 1; flex-direction: row;">
+        <ui:VisualElement name="TeamA" style="flex-grow: 1;">
+            <ui:Label text="Team I" name="TeamAHeader" class="WhiteText" />
+            <ui:Label text="R1 - Score&#10;R2 - Score" name="TeamAScores" class="WhiteText" />
+        </ui:VisualElement>
+        <ui:VisualElement name="TeamB" style="flex-grow: 1;">
+            <ui:Label text="Team I" name="TeamBHeader" class="WhiteText" />
+            <ui:Label text="R1 - Score&#10;R2 - Score" name="TeamBScores" class="WhiteText" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

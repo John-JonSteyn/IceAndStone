@@ -51,3 +51,6 @@ packages/
 # Docker
 docker-compose.override.yml
 .dockerignore
+
+# Plastic
+.plastic

@@ -146,11 +146,11 @@ Transform:
   m_GameObject: {fileID: 152435126}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 519420032}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &152435128
 MonoBehaviour:
@@ -521,7 +521,6 @@ Transform:
   - {fileID: 862553918}
   - {fileID: 518090835}
   - {fileID: 513762630}
-  - {fileID: 152435127}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &519420033
@@ -728,9 +727,126 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1695473777
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1695473778}
+  - component: {fileID: 1695473779}
+  - component: {fileID: 1695473781}
+  - component: {fileID: 1695473780}
+  m_Layer: 0
+  m_Name: AchievementPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1695473778
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695473777}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!328 &1695473779
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695473777}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 32900000, guid: 5f896c639c676614a84f220ea660c38d, type: 3}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: 86fb5c3533ac20a4e80aece1479d3d41, type: 2}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 0
+  m_DataSource: 0
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 0
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 0
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
+--- !u!114 &1695473780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695473777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: d7edb8e2a3be1ad40a423251e2214762, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 49eef87a82626bd42a8811096a77261f, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!114 &1695473781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695473777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39592b7e027bcd141b7c8adc731e708a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiDocument: {fileID: 1695473780}
+  videoElementName: VideoContainer
+  videoPlayer: {fileID: 1695473779}
+  renderTexture: {fileID: 8400000, guid: 86fb5c3533ac20a4e80aece1479d3d41, type: 2}
+  houseCarlClip: {fileID: 32900000, guid: 5f896c639c676614a84f220ea660c38d, type: 3}
+  icebreakerClip: {fileID: 32900000, guid: abdd6c0bc96e27d47a72905f7f4100e8, type: 3}
+  jarlClip: {fileID: 32900000, guid: 52ac94e41c04a4b48aa1d3a8f130e517, type: 3}
+  kingClip: {fileID: 32900000, guid: a12eaee85536647469b5ca67911d5be7, type: 3}
+  lokisLuckClip: {fileID: 32900000, guid: 7f290b77ed0ebb54eab4029aa0f0917e, type: 3}
+  lookingForLeifClip: {fileID: 32900000, guid: e23c1e224417ee34db3c5b9ff7c00abc, type: 3}
+  mightyMjolnirClip: {fileID: 32900000, guid: ca14b30d806dd454c832eb38192fd1ab, type: 3}
+  nilfheimsTouchClip: {fileID: 32900000, guid: cbb02e8f6bf6a0a42a81ff78d7d70508, type: 3}
+  odinsOffspringClip: {fileID: 32900000, guid: a27de6de3e8b26140a4112e6c3af08fc, type: 3}
+  thaneClip: {fileID: 32900000, guid: 9d4bff8ce099cfe41be02bf314f97a0e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1568534297}
   - {fileID: 519420032}
+  - {fileID: 152435127}
+  - {fileID: 1695473778}

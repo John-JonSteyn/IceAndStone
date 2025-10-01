@@ -332,7 +332,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &518090835
 Transform:
   m_ObjectHideFlags: 0
@@ -520,8 +520,8 @@ Transform:
   - {fileID: 355159384}
   - {fileID: 862553918}
   - {fileID: 518090835}
-  - {fileID: 152435127}
   - {fileID: 513762630}
+  - {fileID: 152435127}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &519420033
@@ -708,7 +708,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: d7edb8e2a3be1ad40a423251e2214762, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 69f40a064bf3fef4b8456fb1f54b5c0a, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: d4044ea011f5a4240bc6c44bf635c436, type: 3}
   m_SortingOrder: -1
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920

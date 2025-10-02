@@ -1,3 +1,5 @@
+using IceAndStone.App.Config;
+using IceAndStone.App.Net;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -49,6 +51,7 @@ public sealed class ResultsController : MonoBehaviour
 
     private void HandleEndClicked()
     {
+        StateMachine.Instance.EndSession();
         StateMachine.Instance.GoToWelcome();
     }
 

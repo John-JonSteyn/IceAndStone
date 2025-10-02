@@ -12,6 +12,8 @@ using UnityEngine.UIElements;
 /// <summary>Owns app state, team data, and round/score tracking. Subscribes to Control Panel events.</summary>
 public class StateMachine : MonoBehaviour
 {
+    //Adding Comment
+
     #region Singleton
     public static StateMachine Instance { get; private set; }
 

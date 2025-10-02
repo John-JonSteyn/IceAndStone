@@ -5,38 +5,42 @@ using UnityEngine.Video;
 [DisallowMultipleComponent]
 public sealed class AchievementVideoController : MonoBehaviour
 {
+    #region Editor Fields
     [Header("UI Binding")]
-    [SerializeField] private UIDocument uiDocument;
-    [SerializeField] private string videoElementName = "VideoContainer";
+    [SerializeField] private UIDocument _uiDoc;
 
     [Header("Video")]
-    [SerializeField] private VideoPlayer videoPlayer;
-    [SerializeField] private RenderTexture renderTexture;
+    [SerializeField] private VideoPlayer _videoPlayer;
+    [SerializeField] private RenderTexture _renderTexture;
 
     [Header("Achievement Clips")]
-    [SerializeField] private VideoClip houseCarlClip;
-    [SerializeField] private VideoClip icebreakerClip;
-    [SerializeField] private VideoClip jarlClip;
-    [SerializeField] private VideoClip kingClip;
-    [SerializeField] private VideoClip lokisLuckClip;
-    [SerializeField] private VideoClip lookingForLeifClip;
-    [SerializeField] private VideoClip mightyMjolnirClip;
-    [SerializeField] private VideoClip nilfheimsTouchClip;
-    [SerializeField] private VideoClip odinsOffspringClip;
-    [SerializeField] private VideoClip thaneClip;
+    [SerializeField] private VideoClip _vidClipHouseCarl;
+    [SerializeField] private VideoClip _vidClipIceBreaker;
+    [SerializeField] private VideoClip _vidClipJarl;
+    [SerializeField] private VideoClip _vidClipKing;
+    [SerializeField] private VideoClip _vidClipLoki;
+    [SerializeField] private VideoClip _vidClipLeif;
+    [SerializeField] private VideoClip _vidClipMjolnir;
+    [SerializeField] private VideoClip _vidClipNilfheim;
+    [SerializeField] private VideoClip _vidClipOdin;
+    [SerializeField] private VideoClip _vidClipThane;
+    #endregion
 
+    #region Properties
     private VisualElement videoElement;
     private Texture2D bridgeTexture;
+    #endregion
 
+    #region Methods
     private void OnEnable()
     {
-        var root = uiDocument != null
-            ? uiDocument.rootVisualElement
+        var root = _uiDoc != null
+            ? _uiDoc.rootVisualElement
             : GetComponent<UIDocument>()?.rootVisualElement;
 
         if (root == null) return;
 
-        videoElement = root.Q<VisualElement>(videoElementName);
+        videoElement = root.Q<VisualElement>("VideoContainer");
 
         Hide();
     }
@@ -54,20 +58,21 @@ public sealed class AchievementVideoController : MonoBehaviour
 
     private void CopyRenderTextureToTexture2D()
     {
-        if (renderTexture == null || videoElement == null) return;
+        if (_renderTexture == null || videoElement == null) return;
 
         if (bridgeTexture == null ||
-            bridgeTexture.width != renderTexture.width ||
-            bridgeTexture.height != renderTexture.height)
+            bridgeTexture.width != _renderTexture.width ||
+            bridgeTexture.height != _renderTexture.height)
         {
-            bridgeTexture = new Texture2D(renderTexture.width, renderTexture.height, TextureFormat.RGBA32, false);
+            bridgeTexture = new Texture2D(_renderTexture.width, _renderTexture.height, TextureFormat.RGBA32, false);
         }
 
-        RenderTexture.active = renderTexture;
-        bridgeTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        RenderTexture.active = _renderTexture;
+        bridgeTexture.ReadPixels(new Rect(0, 0, _renderTexture.width, _renderTexture.height), 0, 0);
         bridgeTexture.Apply();
         RenderTexture.active = null;
 
         videoElement.style.backgroundImage = new StyleBackground(bridgeTexture);
     }
+    #endregion
 }

@@ -167,7 +167,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: d7edb8e2a3be1ad40a423251e2214762, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 1e72446429fa74f49a49b03df9fa3f71, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 826c2ecae2c95e842aa7df1103139756, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 355159385}
+  _uiDocument: {fileID: 355159385}
 --- !u!1 &513762629
 GameObject:
   m_ObjectHideFlags: 0
@@ -313,8 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db8ed693bad27041b5b772a6351098c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 513762631}
-  autoReturnSeconds: 30
+  _uiDocument: {fileID: 513762631}
 --- !u!1 &518090834
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d79c0e931575cfd4e9ef2fa314edad5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 518090836}
+  _uiDocument: {fileID: 518090836}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -407,7 +406,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &519420030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -535,18 +534,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb2582df559d9ad4480bb8b2325aace5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  welcomePanel: {fileID: 1471983409}
-  welcomeController: {fileID: 1471983410}
-  teamSetupPanel: {fileID: 355159385}
-  teamSelectionController: {fileID: 355159386}
-  playerEntryPanel: {fileID: 862553919}
-  playerSetupController: {fileID: 862553920}
-  gameHudPanel: {fileID: 518090836}
-  gameHudController: {fileID: 518090837}
-  resultsPanel: {fileID: 513762631}
-  resultsController: {fileID: 513762632}
-  sessionNumber: 1
-  gameNumber: 1
+  _welcomePanel: {fileID: 1471983409}
+  _teamSetupPanel: {fileID: 355159385}
+  _playerEntryPanel: {fileID: 862553919}
+  _gameHudPanel: {fileID: 518090836}
+  _resultsPanel: {fileID: 513762631}
+  _gameHudController: {fileID: 0}
+  _resultsController: {fileID: 513762632}
+  _sessionNumber: 1
+  _gameNumber: 1
 --- !u!1 &862553917
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,7 +607,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 524695ec9f27ac74cbc7a738ab2b8c1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 862553919}
+  _uiDocument: {fileID: 862553919}
 --- !u!1 &1471983407
 GameObject:
   m_ObjectHideFlags: 0
@@ -812,7 +808,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: d7edb8e2a3be1ad40a423251e2214762, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 49eef87a82626bd42a8811096a77261f, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -828,20 +824,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39592b7e027bcd141b7c8adc731e708a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 1695473780}
-  videoElementName: VideoContainer
-  videoPlayer: {fileID: 1695473779}
-  renderTexture: {fileID: 8400000, guid: 86fb5c3533ac20a4e80aece1479d3d41, type: 2}
-  houseCarlClip: {fileID: 32900000, guid: 5f896c639c676614a84f220ea660c38d, type: 3}
-  icebreakerClip: {fileID: 32900000, guid: abdd6c0bc96e27d47a72905f7f4100e8, type: 3}
-  jarlClip: {fileID: 32900000, guid: 52ac94e41c04a4b48aa1d3a8f130e517, type: 3}
-  kingClip: {fileID: 32900000, guid: a12eaee85536647469b5ca67911d5be7, type: 3}
-  lokisLuckClip: {fileID: 32900000, guid: 7f290b77ed0ebb54eab4029aa0f0917e, type: 3}
-  lookingForLeifClip: {fileID: 32900000, guid: e23c1e224417ee34db3c5b9ff7c00abc, type: 3}
-  mightyMjolnirClip: {fileID: 32900000, guid: ca14b30d806dd454c832eb38192fd1ab, type: 3}
-  nilfheimsTouchClip: {fileID: 32900000, guid: cbb02e8f6bf6a0a42a81ff78d7d70508, type: 3}
-  odinsOffspringClip: {fileID: 32900000, guid: a27de6de3e8b26140a4112e6c3af08fc, type: 3}
-  thaneClip: {fileID: 32900000, guid: 9d4bff8ce099cfe41be02bf314f97a0e, type: 3}
+  _uiDoc: {fileID: 1695473780}
+  _videoPlayer: {fileID: 1695473779}
+  _renderTexture: {fileID: 8400000, guid: 86fb5c3533ac20a4e80aece1479d3d41, type: 2}
+  _vidClipHouseCarl: {fileID: 32900000, guid: 5f896c639c676614a84f220ea660c38d, type: 3}
+  _vidClipIceBreaker: {fileID: 32900000, guid: abdd6c0bc96e27d47a72905f7f4100e8, type: 3}
+  _vidClipJarl: {fileID: 32900000, guid: 52ac94e41c04a4b48aa1d3a8f130e517, type: 3}
+  _vidClipKing: {fileID: 32900000, guid: a12eaee85536647469b5ca67911d5be7, type: 3}
+  _vidClipLoki: {fileID: 32900000, guid: 7f290b77ed0ebb54eab4029aa0f0917e, type: 3}
+  _vidClipLeif: {fileID: 32900000, guid: e23c1e224417ee34db3c5b9ff7c00abc, type: 3}
+  _vidClipMjolnir: {fileID: 32900000, guid: ca14b30d806dd454c832eb38192fd1ab, type: 3}
+  _vidClipNilfheim: {fileID: 32900000, guid: cbb02e8f6bf6a0a42a81ff78d7d70508, type: 3}
+  _vidClipOdin: {fileID: 32900000, guid: a27de6de3e8b26140a4112e6c3af08fc, type: 3}
+  _vidClipThane: {fileID: 32900000, guid: 9d4bff8ce099cfe41be02bf314f97a0e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

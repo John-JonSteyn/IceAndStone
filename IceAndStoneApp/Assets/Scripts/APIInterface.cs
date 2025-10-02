@@ -1,15 +1,16 @@
+using IceAndStone.App.Models;
+using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace IceAndStone.App.Net
 {
     public static class ApiInterface
     {
         private static readonly HttpClient _httpClient = new();
-        private static string _baseUrl = "http://localhost:8080";
+        private static string _baseUrl;
 
         #region Startup
 
@@ -30,24 +31,32 @@ namespace IceAndStone.App.Net
         #region Sessions
 
         /// <summary>Starts a new session on a specific lane.</summary>
-        public static Task<HttpResponseMessage> StartSessionAsync(object request, CancellationToken cancellationToken = default)
-            => PostAsync("api/sessions/start", request, cancellationToken);
+        public static Task<HttpResponseMessage> StartSessionAsync(
+            long laneId,
+            CancellationToken cancellationToken = default)
+        {
+            return PostAsync("api/sessions/start", laneId, cancellationToken);
+        }
 
         /// <summary>Ends the current session and closes any active games.</summary>
-        public static Task<HttpResponseMessage> EndSessionAsync(object request, CancellationToken cancellationToken = default)
-            => PostAsync("api/sessions/end", request, cancellationToken);
+        public static Task<HttpResponseMessage> EndSessionAsync(
+            long SessionId,
+            CancellationToken cancellationToken = default)
+        {
+            return PostAsync("api/sessions/end", SessionId, cancellationToken);
+        }
 
         #endregion
 
         #region Games
 
         /// <summary>Starts a new game within a session.</summary>
-        public static Task<HttpResponseMessage> StartGameAsync(object request, CancellationToken cancellationToken = default)
-            => PostAsync("api/games/start", request, cancellationToken);
+        public static Task<HttpResponseMessage> StartGameAsync(StartGameRequest request, CancellationToken cancellationToken = default)
+        => PostAsync("api/games/start", request, cancellationToken);
 
         /// <summary>Ends the current game and finalises results.</summary>
-        public static Task<HttpResponseMessage> EndGameAsync(object request, CancellationToken cancellationToken = default)
-            => PostAsync("api/games/end", request, cancellationToken);
+        public static Task<HttpResponseMessage> EndGameAsync(EndGameRequest request, CancellationToken cancellationToken = default)
+        => PostAsync("api/games/end", request, cancellationToken);
 
         #endregion
 
@@ -74,8 +83,10 @@ namespace IceAndStone.App.Net
         #region Teams
 
         /// <summary>Creates the two opposing teams for a game.</summary>
-        public static Task<HttpResponseMessage> CreateTeamsPairAsync(object request, CancellationToken cancellationToken = default)
-            => PostAsync("api/teams/create-pair", request, cancellationToken);
+        public static Task<HttpResponseMessage> CreateTeamsPairAsync(
+            IceAndStone.App.Models.CreateTeamsRequest request,
+            CancellationToken cancellationToken = default
+        ) => PostAsync("api/teams/create-pair", request, cancellationToken);
 
         /// <summary>Adds players to an existing team roster.</summary>
         public static Task<HttpResponseMessage> AddPlayersAsync(object request, CancellationToken cancellationToken = default)

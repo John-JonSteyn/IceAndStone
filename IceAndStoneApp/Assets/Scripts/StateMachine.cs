@@ -1,297 +1,383 @@
+using IceAndStone.App.Config;
+using IceAndStone.App.Models;
+using IceAndStone.App.Net;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>Owns app state, team data, and round/score tracking. Subscribes to Control Panel events.</summary>
 public class StateMachine : MonoBehaviour
 {
-    #region Editor Fields
-
-    [Header("Panels")]
-    [SerializeField] private UIDocument welcomePanel;
-    [SerializeField] private WelcomePanelController welcomeController;
-
-    [SerializeField] private UIDocument teamSetupPanel;
-    [SerializeField] private TeamSelectionController teamSelectionController;
-
-    [SerializeField] private UIDocument playerEntryPanel;
-    [SerializeField] private PlayerSetupController playerSetupController;
-
-    [SerializeField] private UIDocument gameHudPanel;
-    [SerializeField] private GameHudController gameHudController;
-
-    [SerializeField] private UIDocument resultsPanel;
-    [SerializeField] private ResultsController resultsController;
-
-    [SerializeField] private int sessionNumber = 1;
-    [SerializeField] private int gameNumber = 1;
-
-    #endregion
-
-    #region State
-
-    private TeamPair stateTeams = new();
-    private UiState currentState;
-
-    public enum UiState
-    {
-        Welcome,
-        TeamSetup,
-        PlayerEntry,
-        GameHud,
-        Podium
-    }
-
-    private static readonly UiState[] flow =
-    {
-        UiState.Welcome,
-        UiState.TeamSetup,
-        UiState.PlayerEntry,
-        UiState.GameHud,
-        UiState.Podium
-    };
-
-    #endregion
-
-    #region Unity Lifecycle
+    #region Singleton
+    public static StateMachine Instance { get; private set; }
 
     private void Awake()
     {
-        HideAllPanels();
-        GoToState(UiState.Welcome);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        Startup();
     }
 
     private void OnDestroy()
     {
-        UnsubscribePanelEvents();
+        UnsubscribeControlPanelEvents();
+        if (Instance == this) Instance = null;
     }
-
     #endregion
 
-    #region Public Navigation
+    #region Editor Fields
+    [Header("Panels")]
+    [SerializeField] private UIDocument _welcomePanel;
+    [SerializeField] private UIDocument _teamSetupPanel;
+    [SerializeField] private UIDocument _playerEntryPanel;
+    [SerializeField] private UIDocument _gameHudPanel;
+    [SerializeField] private UIDocument _resultsPanel;
 
-    /// <summary>Goes to the next state in the flow.</summary>
-    public void OnNextRequested() => GoToState(GetNextState(currentState));
-
-    /// <summary>Goes to the next state and stores team data.</summary>
-    public void OnNextRequestedWithData(TeamPair teamPair)
-    {
-        if (teamPair != null)
-        {
-            CopyTeam(teamPair.TeamA, stateTeams.TeamA);
-            CopyTeam(teamPair.TeamB, stateTeams.TeamB);
-        }
-        GoToState(GetNextState(currentState));
-    }
-
-    /// <summary>Goes to the previous state in the flow.</summary>
-    public void OnPreviousRequested() => GoToState(GetPreviousState(currentState));
-
+    [SerializeField] private GameHudController _gameHudController;
+    [SerializeField] private ResultsController _resultsController;
     #endregion
 
-    #region State Switching
+    #region Properties
+    public enum UiState { Welcome, TeamSetup, PlayerEntry, GameHud, Podium }
+    private UiState _current;
 
-    /// <summary>Switches active UI panel based on state.</summary>
-    public void GoToState(UiState selectedState)
+    private TeamPair _stateTeams = new();
+
+    private readonly List<int> _teamARoundScores = new();
+    private readonly List<int> _teamBRoundScores = new();
+    private int _pendingScoreA;
+    private int _pendingScoreB;
+    private int _sessionNumber = 0;
+    private int _gameNumber = 0;
+    private long _gameId;
+    private long _sessionId;
+
+    public TeamPair Teams => _stateTeams;
+    public int SessionNumber => _sessionNumber;
+    public int GameNumber => _gameNumber;
+    public long SessionId => _sessionId;
+    public IReadOnlyList<int> GetTeamARoundScores() => _teamARoundScores.ToArray();
+    public IReadOnlyList<int> GetTeamBRoundScores() => _teamBRoundScores.ToArray();
+    #endregion
+
+    private void Startup()
     {
-        UnsubscribePanelEvents();
+        SubscribeControlPanelEvents();
+        HideAllPanels();
+        GoToState(UiState.Welcome);
+    }
+
+    #region Navigation
+    public void GoToState(UiState selected)
+    {
         HideAllPanels();
 
-        switch (selectedState)
+        switch (selected)
         {
             case UiState.Welcome:
-                ShowUIDoc(welcomePanel);
-                if (welcomeController == null && welcomePanel != null)
-                    welcomeController = welcomePanel.GetComponent<WelcomePanelController>();
-                if (welcomeController != null)
-                    welcomeController.ProceedRequested += OnNextRequested;
+                _sessionNumber++;
+                ResetAllState();
+                ShowUIDoc(_welcomePanel);
                 break;
 
             case UiState.TeamSetup:
-                ShowUIDoc(teamSetupPanel);
-                if (teamSelectionController == null && teamSetupPanel != null)
-                    teamSelectionController = teamSetupPanel.GetComponent<TeamSelectionController>();
-                if (teamSelectionController != null)
+                try
                 {
-                    teamSelectionController.SetInitialValues(stateTeams);
-                    teamSelectionController.BackRequested += OnPreviousRequested;
-                    teamSelectionController.NextRequested += OnNextRequestedWithData;
+                    var startSession = ApiInterface.StartSessionAsync(ConfigManager.Current.LaneId);
+                    _sessionId = startSession.Id;
+                    Debug.Log($"Session Id: {_sessionId}");
                 }
+                catch (Exception ex)
+                {
+                    Debug.Log($"Error starting session. Message: {ex}");
+                }
+                ShowUIDoc(_teamSetupPanel);
                 break;
 
             case UiState.PlayerEntry:
-                ShowUIDoc(playerEntryPanel);
-                if (playerSetupController == null && playerEntryPanel != null)
-                    playerSetupController = playerEntryPanel.GetComponent<PlayerSetupController>();
-                if (playerSetupController != null)
-                {
-                    playerSetupController.SetTeamInfo(stateTeams);
-                    playerSetupController.BackRequested += OnPreviousRequested;
-                    playerSetupController.NextRequested += OnNextRequestedWithData;
-                }
+                ShowUIDoc(_playerEntryPanel);
                 break;
 
             case UiState.GameHud:
-                ShowUIDoc(gameHudPanel);
-                if (gameHudController == null && gameHudPanel != null)
-                    gameHudController = gameHudPanel.GetComponent<GameHudController>();
-                if (gameHudController != null)
-                {
-                    gameHudController.SetTeams(stateTeams);
-                    gameHudController.SetSessionAndGame(sessionNumber, gameNumber);
-                    gameHudController.ResetScores();
-                }
-                SubscribeGlobalGameEventsForHud();
+                _gameNumber++;
+                _ = StartGame();
+                ResetScores();
+                ShowUIDoc(_gameHudPanel);
+                if (_gameHudController == null && _gameHudPanel != null)
+                    _gameHudController = _gameHudPanel.GetComponent<GameHudController>();
+                if (_gameHudController != null)
+                    _gameHudController.RefreshFromState();
                 break;
 
             case UiState.Podium:
-                ShowUIDoc(resultsPanel);
-                if (resultsController == null && resultsPanel != null)
-                    resultsController = resultsPanel.GetComponent<ResultsController>();
-                if (resultsController != null)
-                {
-                    var scoresA = gameHudController != null ? gameHudController.GetTeamARoundScores() : System.Array.Empty<int>();
-                    var scoresB = gameHudController != null ? gameHudController.GetTeamBRoundScores() : System.Array.Empty<int>();
-                    resultsController.SetResults(stateTeams, scoresA, scoresB);
-                    resultsController.DoneRequested -= HandleResultsDone;
-                    resultsController.TimedOut -= HandleResultsTimedOut;
-                    resultsController.DoneRequested += HandleResultsDone;
-                    resultsController.TimedOut += HandleResultsTimedOut;
-                }
+                _ = EndGame();
+                ShowUIDoc(_resultsPanel);
                 break;
         }
 
-        currentState = selectedState;
+        _current = selected;
     }
 
-    /// <summary>Unsubscribes events from all controllers.</summary>
-    private void UnsubscribePanelEvents()
-    {
-        if (welcomeController != null)
-            welcomeController.ProceedRequested -= OnNextRequested;
-
-        if (teamSelectionController != null)
-        {
-            teamSelectionController.BackRequested -= OnPreviousRequested;
-            teamSelectionController.NextRequested -= OnNextRequestedWithData;
-        }
-
-        if (playerSetupController != null)
-        {
-            playerSetupController.BackRequested -= OnPreviousRequested;
-            playerSetupController.NextRequested -= OnNextRequestedWithData;
-        }
-
-        if (resultsController != null)
-        {
-            resultsController.DoneRequested -= HandleResultsDone;
-            resultsController.TimedOut -= HandleResultsTimedOut;
-        }
-
-        UnsubscribeGlobalGameEvents();
-    }
-
+    public void GoToWelcome() => GoToState(UiState.Welcome);
     #endregion
 
-    #region Game Events
-
-    /// <summary>Subscribes to game end events for HUD.</summary>
-    private void SubscribeGlobalGameEventsForHud()
+    #region Events
+    private void SubscribeControlPanelEvents()
     {
-        GameEvents.EndGameRequested -= HandleEndGameRequested;
-        GameEvents.EndGameRequested += HandleEndGameRequested;
+        UnsubscribeControlPanelEvents();
+        GameEvents.AddScoreARequested += HandleAddScoreA;
+        GameEvents.AddScoreBRequested += HandleAddScoreB;
+        GameEvents.EndRoundRequested += HandleEndRound;
+        GameEvents.EndGameRequested += HandleEndGame;
     }
 
-    /// <summary>Unsubscribes from game end events.</summary>
-    private void UnsubscribeGlobalGameEvents()
+    private void UnsubscribeControlPanelEvents()
     {
-        GameEvents.EndGameRequested -= HandleEndGameRequested;
+        GameEvents.AddScoreARequested -= HandleAddScoreA;
+        GameEvents.AddScoreBRequested -= HandleAddScoreB;
+        GameEvents.EndRoundRequested -= HandleEndRound;
+        GameEvents.EndGameRequested -= HandleEndGame;
     }
 
-    /// <summary>Goes to podium screen when game ends.</summary>
-    private void HandleEndGameRequested()
+    private void HandleAddScoreA(int score)
+    {
+        _pendingScoreA = Mathf.Max(0, score);
+        if (_current == UiState.GameHud && _gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+
+    private void HandleAddScoreB(int score)
+    {
+        _pendingScoreB = Mathf.Max(0, score);
+        if (_current == UiState.GameHud && _gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+
+    private void HandleEndRound()
+    {
+        _teamARoundScores.Add(_pendingScoreA);
+        _teamBRoundScores.Add(_pendingScoreB);
+        _pendingScoreA = 0;
+        _pendingScoreB = 0;
+
+        if (_current == UiState.GameHud && _gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+
+    private void HandleEndGame()
     {
         GoToState(UiState.Podium);
     }
-
     #endregion
 
-    #region Helpers
+    #region Mutators
+    public void SetTeam(TeamPair teams)
+    {
+        if (teams == null) return;
+        CopyTeam(teams.TeamA, _stateTeams.TeamA);
+        CopyTeam(teams.TeamB, _stateTeams.TeamB);
 
-    /// <summary>Copies a team into another.</summary>
+        if (_current == UiState.GameHud && _gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+
+    public void ResetScores()
+    {
+        _teamARoundScores.Clear();
+        _teamBRoundScores.Clear();
+        _pendingScoreA = 0;
+        _pendingScoreB = 0;
+
+        if (_current == UiState.GameHud && _gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+    #endregion
+
+    #region Utility
+    private void ResetAllState()
+    {
+        _sessionId = 0;
+        _gameId = 0;
+        _gameNumber = 0;
+
+        _stateTeams = new TeamPair();
+        _teamARoundScores.Clear();
+        _teamBRoundScores.Clear();
+        _pendingScoreA = 0;
+        _pendingScoreB = 0;
+
+        if (_gameHudController != null)
+            _gameHudController.RefreshFromState();
+    }
+
     private static void CopyTeam(TeamModel source, TeamModel destination)
     {
         destination.Name = source.Name;
         destination.Colour = source.Colour;
         destination.HasFirstRound = source.HasFirstRound;
         destination.Players.Clear();
-        if (source.Players != null)
-            destination.Players.AddRange(source.Players);
+        if (source.Players != null) destination.Players.AddRange(source.Players);
     }
 
-    /// <summary>Hides all UI panels.</summary>
     private void HideAllPanels()
     {
-        SetActive(welcomePanel, false);
-        SetActive(teamSetupPanel, false);
-        SetActive(playerEntryPanel, false);
-        SetActive(gameHudPanel, false);
-        SetActive(resultsPanel, false);
+        SetActive(_welcomePanel, false);
+        SetActive(_teamSetupPanel, false);
+        SetActive(_playerEntryPanel, false);
+        SetActive(_gameHudPanel, false);
+        SetActive(_resultsPanel, false);
     }
 
-    /// <summary>Handles when results are confirmed.</summary>
-    private void HandleResultsDone()
-    {
-        gameNumber += 1;
-        stateTeams = new TeamPair();
-        if (gameHudController != null)
-            gameHudController.ResetScores();
-        GoToState(UiState.Welcome);
-    }
-
-    /// <summary>Handles when results timeout expires.</summary>
-    private void HandleResultsTimedOut()
-    {
-        HandleResultsDone();
-    }
-
-    /// <summary>Shows a UI panel.</summary>
     private static void ShowUIDoc(UIDocument doc) => SetActive(doc, true);
 
-    /// <summary>Sets panel active state.</summary>
     private static void SetActive(UIDocument doc, bool value)
     {
         if (doc != null && doc.gameObject.activeSelf != value)
             doc.gameObject.SetActive(value);
     }
+    #endregion
 
-    /// <summary>Gets the next state.</summary>
-    private static UiState GetNextState(UiState current)
+    #region public API Calls
+    public void EndSession()
     {
-        int index = GetIndexOf(current);
-        if (index < 0) return current;
-        int nextIndex = index + 1;
-        if (nextIndex >= flow.Length) return flow[0];
-        return flow[nextIndex];
+        ApiInterface.EndSessionAsync(StateMachine.Instance.SessionId);
     }
 
-    /// <summary>Gets the previous state.</summary>
-    private static UiState GetPreviousState(UiState current)
+    public async Task StartGame()
     {
-        int index = GetIndexOf(current);
-        if (index < 0) return current;
-        int prevIndex = index - 1;
-        if (prevIndex < 0) return flow[flow.Length - 1];
-        return flow[prevIndex];
-    }
+        if (_sessionId == 0)
+            return;
 
-    /// <summary>Gets the index of a state in the flow.</summary>
-    private static int GetIndexOf(UiState state)
-    {
-        for (int i = 0; i < flow.Length; i++)
+        try
         {
-            if (flow[i] == state) return i;
+            using var cts = new CancellationTokenSource(5000);
+            var startResp = await ApiInterface.StartGameAsync(
+                new StartGameRequest { SessionId = _sessionId, TargetRounds = null },
+                cts.Token
+            );
+            startResp.EnsureSuccessStatusCode();
+
+            var gameDto = await ApiInterface.ReadJsonAsync<GameResponse>(startResp.Content);
+            if (gameDto == null)
+            {
+                Debug.LogError("[StateMachine] /games/start returned empty body.");
+                return;
+            }
+
+            _gameId = gameDto.Id;
         }
-        return -1;
+        catch (Exception ex)
+        {
+            //Debug.LogError($"[StateMachine] Error starting game: {ex}");
+            return;
+        }
+
+        try
+        {
+            using var cts = new CancellationTokenSource(5000);
+            var createReq = new CreateTeamsRequest
+            {
+                GameId = _gameId,
+                TeamAName = _stateTeams.TeamA.Name,
+                TeamAColour = _stateTeams.TeamA.Colour.ToString(),
+                TeamBName = _stateTeams.TeamB.Name,
+                TeamBColour = _stateTeams.TeamB.Colour.ToString(),
+                FirstRoundTeam = _stateTeams.TeamA.HasFirstRound ? "A"
+                                 : _stateTeams.TeamB.HasFirstRound ? "B"
+                                 : null
+            };
+
+            var pairHttp = await ApiInterface.CreateTeamsPairAsync(createReq, cts.Token);
+            pairHttp.EnsureSuccessStatusCode();
+
+            var pairDto = await ApiInterface.ReadJsonAsync<TeamPairResponseDto>(pairHttp.Content);
+            if (pairDto?.Item1 == null || pairDto.Item2 == null)
+            {
+                Debug.LogError("[StateMachine] /teams/create-pair returned invalid body.");
+                return;
+            }
+
+            _stateTeams.TeamA.Id = pairDto.Item1.Id;
+            _stateTeams.TeamA.Name = string.IsNullOrWhiteSpace(pairDto.Item1.Name) ? _stateTeams.TeamA.Name : pairDto.Item1.Name;
+            _stateTeams.TeamA.Colour = ParseColourOrDefault(pairDto.Item1.Colour, _stateTeams.TeamA.Colour);
+
+            _stateTeams.TeamB.Id = pairDto.Item2.Id;
+            _stateTeams.TeamB.Name = string.IsNullOrWhiteSpace(pairDto.Item2.Name) ? _stateTeams.TeamB.Name : pairDto.Item2.Name;
+            _stateTeams.TeamB.Colour = ParseColourOrDefault(pairDto.Item2.Colour, _stateTeams.TeamB.Colour);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[StateMachine] Error creating teams: {ex}");
+            return;
+        }
+
+        await AddPlayersForTeamAsync(_stateTeams.TeamA);
+        await AddPlayersForTeamAsync(_stateTeams.TeamB);
     }
 
+    private async Task EndGame()
+    {
+        if (_sessionId == 0 || _gameId == 0)
+            return;
+
+        var request = new EndGameRequest
+        {
+            GameId = _gameId
+        };
+
+        try
+        {
+            using var cancellationToken = new CancellationTokenSource(5000);
+            var response = await ApiInterface.EndGameAsync(request, cancellationToken.Token);
+            response.EnsureSuccessStatusCode();
+
+            Debug.Log("[StateMachine] Game ended successfully.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[StateMachine] Error ending game: {ex}");
+        }
+    }
+
+    private static TeamColour ParseColourOrDefault(string colour, TeamColour fallback)
+    {
+        if (!string.IsNullOrWhiteSpace(colour) &&
+            Enum.TryParse<TeamColour>(colour, true, out var parsed))
+            return parsed;
+        return fallback;
+    }
+
+    private async Task AddPlayersForTeamAsync(TeamModel team)
+    {
+        if (team.Id == 0 || team.Players == null || team.Players.Count == 0)
+            return;
+
+        var addPlayersRequest = new AddPlayersRequest
+        {
+            TeamId = team.Id,
+            PlayerNames = new List<string>(team.Players)
+        };
+
+        try
+        {
+            using var cancellationToken = new CancellationTokenSource(5000);
+            var url = await ApiInterface.AddPlayersAsync(addPlayersRequest, cancellationToken.Token);
+            url.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[StateMachine] Error adding players for team '{team.Name}' (Id={team.Id}): {ex}");
+        }
+    }
     #endregion
 }

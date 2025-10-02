@@ -5,39 +5,42 @@ public class ControlPanelController : MonoBehaviour
 {
     [SerializeField] private UIDocument uiDocument;
 
-    private VisualElement container;
-    private TextField teamAScoreText;
-    private TextField teamBScoreText;
-    private IntegerField teamAScoreInt;
-    private IntegerField teamBScoreInt;
+    #region Properties
+    private VisualElement _container;
+    private TextField _teamAScoreText;
+    private TextField _teamBScoreText;
+    private IntegerField _teamAScoreInt;
+    private IntegerField _teamBScoreInt;
 
-    private Button btnAddScoreA;
-    private Button btnAddScoreB;
-    private Button btnEndRound;
-    private Button btnEndGame;
+    private Button _btnAddScoreA;
+    private Button _btnAddScoreB;
+    private Button _btnEndRound;
+    private Button _btnEndGame;
+    #endregion
 
+    #region Methods
     /// <summary>Binds UI and subscribes to events.</summary>
     private void OnEnable()
     {
         var root = uiDocument != null ? uiDocument.rootVisualElement : GetComponent<UIDocument>()?.rootVisualElement;
         if (root == null) return;
 
-        container = root.Q<VisualElement>("Container");
+        _container = root.Q<VisualElement>("Container");
 
-        teamAScoreText = root.Q<TextField>("TeamAScore");
-        teamBScoreText = root.Q<TextField>("TeamBScore");
-        teamAScoreInt = root.Q<IntegerField>("TeamAScore");
-        teamBScoreInt = root.Q<IntegerField>("TeamBScore");
+        _teamAScoreText = root.Q<TextField>("TeamAScore");
+        _teamBScoreText = root.Q<TextField>("TeamBScore");
+        _teamAScoreInt = root.Q<IntegerField>("TeamAScore");
+        _teamBScoreInt = root.Q<IntegerField>("TeamBScore");
 
-        btnAddScoreA = root.Q<Button>("BtnAddScoreA");
-        btnAddScoreB = root.Q<Button>("BtnAddScoreB");
-        btnEndRound = root.Q<Button>("BtnEndRound");
-        btnEndGame = root.Q<Button>("BtnEndGame");
+        _btnAddScoreA = root.Q<Button>("BtnAddScoreA");
+        _btnAddScoreB = root.Q<Button>("BtnAddScoreB");
+        _btnEndRound = root.Q<Button>("BtnEndRound");
+        _btnEndGame = root.Q<Button>("BtnEndGame");
 
-        if (btnAddScoreA != null) btnAddScoreA.clicked += HandleAddScoreA;
-        if (btnAddScoreB != null) btnAddScoreB.clicked += HandleAddScoreB;
-        if (btnEndRound != null) btnEndRound.clicked += HandleEndRound;
-        if (btnEndGame != null) btnEndGame.clicked += HandleEndGame;
+        if (_btnAddScoreA != null) _btnAddScoreA.clicked += HandleAddScoreA;
+        if (_btnAddScoreB != null) _btnAddScoreB.clicked += HandleAddScoreB;
+        if (_btnEndRound != null) _btnEndRound.clicked += HandleEndRound;
+        if (_btnEndGame != null) _btnEndGame.clicked += HandleEndGame;
 
         Hide();
     }
@@ -52,41 +55,44 @@ public class ControlPanelController : MonoBehaviour
     /// <summary>Unsubscribes from events.</summary>
     private void OnDisable()
     {
-        if (btnAddScoreA != null) btnAddScoreA.clicked -= HandleAddScoreA;
-        if (btnAddScoreB != null) btnAddScoreB.clicked -= HandleAddScoreB;
-        if (btnEndRound != null) btnEndRound.clicked -= HandleEndRound;
-        if (btnEndGame != null) btnEndGame.clicked -= HandleEndGame;
+        if (_btnAddScoreA != null) _btnAddScoreA.clicked -= HandleAddScoreA;
+        if (_btnAddScoreB != null) _btnAddScoreB.clicked -= HandleAddScoreB;
+        if (_btnEndRound != null) _btnEndRound.clicked -= HandleEndRound;
+        if (_btnEndGame != null) _btnEndGame.clicked -= HandleEndGame;
     }
 
     /// <summary>Shows the control panel.</summary>
     public void Show()
     {
-        if (container != null) container.style.display = DisplayStyle.Flex;
+        if (_container != null)
+            _container.style.display = DisplayStyle.Flex;
     }
 
     /// <summary>Hides the control panel.</summary>
     public void Hide()
     {
-        if (container != null) container.style.display = DisplayStyle.None;
+        if (_container != null)
+            _container.style.display = DisplayStyle.None;
     }
 
     /// <summary>Toggles control panel visibility.</summary>
     public void Toggle()
     {
-        if (container == null) return;
-        container.style.display = container.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+        if (_container == null)
+            return;
+        _container.style.display = _container.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     /// <summary>Handles Add Score A button click.</summary>
     private void HandleAddScoreA()
     {
-        GameEvents.RaiseAddScoreA(ReadScore(teamAScoreText, teamAScoreInt));
+        GameEvents.RaiseAddScoreA(ReadScore(_teamAScoreText, _teamAScoreInt));
     }
 
     /// <summary>Handles Add Score B button click.</summary>
     private void HandleAddScoreB()
     {
-        GameEvents.RaiseAddScoreB(ReadScore(teamBScoreText, teamBScoreInt));
+        GameEvents.RaiseAddScoreB(ReadScore(_teamBScoreText, _teamBScoreInt));
     }
 
     /// <summary>Handles End Round button click.</summary>
@@ -104,8 +110,11 @@ public class ControlPanelController : MonoBehaviour
     /// <summary>Parses score from integer or text field.</summary>
     private static int ReadScore(TextField textField, IntegerField intField)
     {
-        if (intField != null) return Mathf.Max(0, intField.value);
-        if (textField != null && int.TryParse(textField.value, out int parsed)) return Mathf.Max(0, parsed);
+        if (intField != null)
+            return Mathf.Max(0, intField.value);
+        if (textField != null && int.TryParse(textField.value, out int parsed))
+            return Mathf.Max(0, parsed);
         return 0;
     }
+    #endregion
 }

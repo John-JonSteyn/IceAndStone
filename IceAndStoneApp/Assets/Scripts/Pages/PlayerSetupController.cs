@@ -3,148 +3,114 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-/// <summary>
-/// Handles player entry UI and raises navigation events.
-/// </summary>
+/// <summary>Handles player entry and writes teams directly into StateMachine.</summary>
 public class PlayerSetupController : MonoBehaviour
 {
-    public event Action BackRequested;
-    public event Action<TeamPair> NextRequested;
+    [SerializeField] private UIDocument _uiDocument;
 
-    [SerializeField] private UIDocument uiDocument;
+    #region Properties
+    private Label _teamAHeader;
+    private Label _teamBHeader;
 
-    private Label teamAHeader;
-    private Label teamBHeader;
+    private TextField _teamALeadField;
+    private TextField _teamASecondField;
+    private TextField _teamAThirdField;
+    private TextField _teamASkipField;
 
-    private TextField teamALeadField;
-    private TextField teamASecondField;
-    private TextField teamAThirdField;
-    private TextField teamASkipField;
+    private TextField _teamBLeadField;
+    private TextField _teamBSecondField;
+    private TextField _teamBThirdField;
+    private TextField _teamBSkipField;
 
-    private TextField teamBLeadField;
-    private TextField teamBSecondField;
-    private TextField teamBThirdField;
-    private TextField teamBSkipField;
+    private Button _backButton;
+    private Button _nextButton;
 
-    private Button backButton;
-    private Button nextButton;
+    private readonly TeamPair _working = new();
+    #endregion
 
-    private readonly TeamPair working = new();
-
-    private TeamPair pendingTeamInfo;
-    private bool uiBound;
-
-    /// <summary>Assigns incoming team info and defers if UI not bound yet.</summary>
-    public void SetTeamInfo(TeamPair selection)
-    {
-        if (selection == null) return;
-
-        if (!uiBound)
-        {
-            pendingTeamInfo = selection;
-            return;
-        }
-
-        CopyIntoWorking(selection);
-        ApplyHeaders();
-        PrefillInputsFromPlayers();
-    }
-
-    /// <summary>Binds UI elements and applies any pending data.</summary>
+    #region Methods
     private void OnEnable()
     {
-        var root = uiDocument != null ? uiDocument.rootVisualElement : GetComponent<UIDocument>()?.rootVisualElement;
-        if (root == null) return;
+        var root = _uiDocument != null ? _uiDocument.rootVisualElement : GetComponent<UIDocument>().rootVisualElement;
 
-        teamAHeader = root.Q<Label>("TeamAHeader");
-        teamALeadField = root.Q<TextField>("InFieldTALead");
-        teamASecondField = root.Q<TextField>("InFieldTASecond");
-        teamAThirdField = root.Q<TextField>("InFieldTAThird");
-        teamASkipField = root.Q<TextField>("InFieldTASkip");
+        _teamAHeader = root.Q<Label>("TeamAHeader");
+        _teamALeadField = root.Q<TextField>("InFieldTALead");
+        _teamASecondField = root.Q<TextField>("InFieldTASecond");
+        _teamAThirdField = root.Q<TextField>("InFieldTAThird");
+        _teamASkipField = root.Q<TextField>("InFieldTASkip");
 
-        teamBHeader = root.Q<Label>("TeamBHeader");
-        teamBLeadField = root.Q<TextField>("InFieldTBLead");
-        teamBSecondField = root.Q<TextField>("InFieldTBSecond");
-        teamBThirdField = root.Q<TextField>("InFieldTBThird");
-        teamBSkipField = root.Q<TextField>("InFieldTBSkip");
+        _teamBHeader = root.Q<Label>("TeamBHeader");
+        _teamBLeadField = root.Q<TextField>("InFieldTBLead");
+        _teamBSecondField = root.Q<TextField>("InFieldTBSecond");
+        _teamBThirdField = root.Q<TextField>("InFieldTBThird");
+        _teamBSkipField = root.Q<TextField>("InFieldTBSkip");
 
-        backButton = root.Q<Button>("BtnBack");
-        nextButton = root.Q<Button>("BtnNext");
+        _backButton = root.Q<Button>("BtnBack");
+        _nextButton = root.Q<Button>("BtnNext");
 
-        if (backButton != null) backButton.clicked += HandleBackClicked;
-        if (nextButton != null) nextButton.clicked += HandleNextClicked;
+        _backButton.clicked += HandleBackClicked;
+        _nextButton.clicked += HandleNextClicked;
 
-        uiBound = true;
-
-        if (pendingTeamInfo != null)
-        {
-            CopyIntoWorking(pendingTeamInfo);
-            pendingTeamInfo = null;
-        }
-
+        var fromState = StateMachine.Instance.Teams;
+        CopyIntoWorking(fromState);
         ApplyHeaders();
         PrefillInputsFromPlayers();
     }
 
-    /// <summary>Unbinds events and marks UI as not ready.</summary>
     private void OnDisable()
     {
-        uiBound = false;
-
-        if (backButton != null) backButton.clicked -= HandleBackClicked;
-        if (nextButton != null) nextButton.clicked -= HandleNextClicked;
+        _backButton.clicked -= HandleBackClicked;
+        _nextButton.clicked -= HandleNextClicked;
     }
 
-    /// <summary>Raises back navigation event.</summary>
-    private void HandleBackClicked() => BackRequested?.Invoke();
+    /// <summary>Navigates back to team setup.</summary>
+    private void HandleBackClicked()
+    {
+        StateMachine.Instance.GoToState(StateMachine.UiState.TeamSetup);
+    }
 
-    /// <summary>Validates players and raises next navigation event.</summary>
+    /// <summary>Validates players, writes into StateMachine, and goes to game HUD.</summary>
     private void HandleNextClicked()
     {
-        working.TeamA.Players = CollectNonEmpty(teamALeadField, teamASecondField, teamAThirdField, teamASkipField);
-        working.TeamB.Players = CollectNonEmpty(teamBLeadField, teamBSecondField, teamBThirdField, teamBSkipField);
+        _working.TeamA.Players = CollectNonEmpty(_teamALeadField, _teamASecondField, _teamAThirdField, _teamASkipField);
+        _working.TeamB.Players = CollectNonEmpty(_teamBLeadField, _teamBSecondField, _teamBThirdField, _teamBSkipField);
 
-        if (working.TeamA.Players.Count < 2 || working.TeamB.Players.Count < 2)
+        if (_working.TeamA.Players.Count < 2 || _working.TeamB.Players.Count < 2)
         {
             Debug.LogWarning("Each team should have at least two players.");
             return;
         }
 
-        NextRequested?.Invoke(working);
+        StateMachine.Instance.SetTeam(_working);
+        StateMachine.Instance.GoToState(StateMachine.UiState.GameHud);
     }
 
-    /// <summary>Applies team names to header labels.</summary>
+    /// <summary>Sets the team name labels.</summary>
     private void ApplyHeaders()
     {
-        if (teamAHeader != null) teamAHeader.text = working.TeamA.Name ?? "";
-        if (teamBHeader != null) teamBHeader.text = working.TeamB.Name ?? "";
+        _teamAHeader.text = _working.TeamA.Name ?? "";
+        _teamBHeader.text = _working.TeamB.Name ?? "";
     }
 
-    /// <summary>Prefills text fields from existing player data.</summary>
+    /// <summary>Prefills all text fields from team player lists.</summary>
     private void PrefillInputsFromPlayers()
     {
-        SetText(teamALeadField, GetPlayerOrEmpty(working.TeamA.Players, 0));
-        SetText(teamASecondField, GetPlayerOrEmpty(working.TeamA.Players, 1));
-        SetText(teamAThirdField, GetPlayerOrEmpty(working.TeamA.Players, 2));
-        SetText(teamASkipField, GetPlayerOrEmpty(working.TeamA.Players, 3));
+        SetText(_teamALeadField, GetPlayerOrEmpty(_working.TeamA.Players, 0));
+        SetText(_teamASecondField, GetPlayerOrEmpty(_working.TeamA.Players, 1));
+        SetText(_teamAThirdField, GetPlayerOrEmpty(_working.TeamA.Players, 2));
+        SetText(_teamASkipField, GetPlayerOrEmpty(_working.TeamA.Players, 3));
 
-        SetText(teamBLeadField, GetPlayerOrEmpty(working.TeamB.Players, 0));
-        SetText(teamBSecondField, GetPlayerOrEmpty(working.TeamB.Players, 1));
-        SetText(teamBThirdField, GetPlayerOrEmpty(working.TeamB.Players, 2));
-        SetText(teamBSkipField, GetPlayerOrEmpty(working.TeamB.Players, 3));
+        SetText(_teamBLeadField, GetPlayerOrEmpty(_working.TeamB.Players, 0));
+        SetText(_teamBSecondField, GetPlayerOrEmpty(_working.TeamB.Players, 1));
+        SetText(_teamBThirdField, GetPlayerOrEmpty(_working.TeamB.Players, 2));
+        SetText(_teamBSkipField, GetPlayerOrEmpty(_working.TeamB.Players, 3));
     }
 
-    /// <summary>Returns a player name or empty string for index.</summary>
-    private static string GetPlayerOrEmpty(List<string> players, int index)
-    {
-        return (players != null && index >= 0 && index < players.Count) ? players[index] : "";
-    }
-
-    /// <summary>Copies data from one TeamPair into working instance.</summary>
+    /// <summary>Copies a TeamPair into the working buffer.</summary>
     private void CopyIntoWorking(TeamPair source)
     {
-        CopyTeam(source.TeamA, working.TeamA);
-        CopyTeam(source.TeamB, working.TeamB);
+        CopyTeam(source.TeamA, _working.TeamA);
+        CopyTeam(source.TeamB, _working.TeamB);
     }
 
     /// <summary>Copies one team model into another.</summary>
@@ -154,24 +120,32 @@ public class PlayerSetupController : MonoBehaviour
         destination.Colour = source.Colour;
         destination.HasFirstRound = source.HasFirstRound;
         destination.Players.Clear();
-        if (source.Players != null) destination.Players.AddRange(source.Players);
+        if (source.Players != null)
+            destination.Players.AddRange(source.Players);
     }
 
-    /// <summary>Sets text for a UI text field.</summary>
+    /// <summary>Returns a player name or empty string for an index.</summary>
+    private static string GetPlayerOrEmpty(List<string> players, int index)
+    {
+        return (players != null && index >= 0 && index < players.Count) ? players[index] : "";
+    }
+
+    /// <summary>Sets a text field’s value.</summary>
     private static void SetText(TextField field, string value)
     {
-        if (field != null) field.value = value ?? "";
+        field.value = value ?? "";
     }
 
-    /// <summary>Collects non-empty player names from fields.</summary>
+    /// <summary>Collects non-empty names from text fields.</summary>
     private static List<string> CollectNonEmpty(params TextField[] fields)
     {
         var list = new List<string>(4);
         foreach (var field in fields)
         {
-            string value = field?.value?.Trim() ?? "";
+            var value = field.value?.Trim() ?? "";
             if (!string.IsNullOrWhiteSpace(value)) list.Add(value);
         }
         return list;
     }
+    #endregion
 }

@@ -9,7 +9,7 @@ namespace IceAndStone.App.Net
     public static class ApiInterface
     {
         private static readonly HttpClient _httpClient = new();
-        private static string _baseUrl = "http://localhost:8080";
+        private static string _baseUrl;
 
         #region Startup
 

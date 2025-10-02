@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class WelcomePanelController : MonoBehaviour
 {
-    public event Action ProceedRequested;
-
     private void Update()
     {
         if (Input.anyKeyDown)
@@ -12,7 +10,7 @@ public class WelcomePanelController : MonoBehaviour
             if (!gameObject.activeInHierarchy)
                 return;
 
-            ProceedRequested?.Invoke();
+            StateMachine.Instance.GoToState(StateMachine.UiState.TeamSetup);
         }
     }
 }
